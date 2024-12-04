@@ -515,10 +515,11 @@ def adicionar_tarefa(tarefas, nome_tarefa):
 
 def ver_tarefas(tarefas):
     print("Lista de tarefas:")
-    for indice, tarefa in enumerate(tarefas)
-        status = tarefa["completada"]
-
-
+    for indice, tarefa in enumerate(tarefas):
+        status = "x" if tarefa["completada"] else " "
+        nome_tarefa = tarefa["tarefa"]
+        print(f"{indice}. [{status}] {nome_tarefa}")
+        
 
 
 tarefas = []
