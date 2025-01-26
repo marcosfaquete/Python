@@ -1,66 +1,129 @@
 import pygame
-from random import  randint
+import random
+import time
 
-branco=(255,255,255)
-preto=(0,0,0)
-vermelho=(255,0,0)
-verde=(0,255,0)
-azul=(0,0,255)
+# Inicializa o Pygame
+pygame.init()
 
-try:
-    pygame.init()
-except:
-    print('O modulo pygame não foi inicializado com sucesso')
+# Dimensões da tela
+WIDTH, HEIGHT = 800, 600
 
-largura=640
-altura=480
-tamanho = 10
+# Cores
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
-pos_x=randint(0,(largura-tamanho)/10)*10
-pos_y=randint(0,(largura-tamanho)/10)*10
-velocidade_x=0
-velocidade_y=0
-relogio = pygame.time.Clock()
+# Configurações da cobra
+BLOCK_SIZE = 20
+SNAKE_SPEED = 15
 
+# Inicializa a tela
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Snake Game")
 
-fundo = pygame.display.set_mode((largura,altura))
-pygame.display.set_caption('Snake')
+# Relógio para controle da velocidade
+clock = pygame.time.Clock()
 
-sair = True
+# Função para desenhar a cobra
+def draw_snake(block_size, snake_list):
+    for block in snake_list:
+        pygame.draw.rect(screen, GREEN, [block[0], block[1], block_size, block_size])
 
-while sair:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sair = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                velocidade_y=0
-                velocidade_x=-tamanho
-            if event.key == pygame.K_RIGHT:
-                velocidade_y=0
-                velocidade_x=tamanho
-            if event.key == pygame.K_UP:
-                velocidade_x=0
-                velocidade_y=-tamanho
-            if event.key == pygame.K_DOWN:
-                velocidade_x=0
-                velocidade_y=tamanho
+# Função principal do jogo
+def game_loop():
+    game_over = False
+    game_close = False
 
+    # Posição inicial da cobra
+    x1 = WIDTH // 2
+    y1 = HEIGHT // 2
 
-    fundo.fill(branco)
-    pygame.draw.rect(fundo, preto, [pos_x,pos_y,tamanho,tamanho])
-    pos_x+=velocidade_x
-    pos_y+=velocidade_y
+    # Alteração de posição
+    x1_change = 0
+    y1_change = 0
 
-    pygame.display.update()
-    relogio.tick(20)
-    if pos_x >= largura:
-        pos_x=0
-    if pos_x < 0:
-        pos_x=largura-tamanho
-    if pos_y >= altura:
-        pos_y=0
-    if pos_y < 0:
-        pos_y=altura-tamanho
+    # Lista e tamanho inicial da cobra
+    snake_list = []
+    length_of_snake = 1
 
-pygame.quit()
+    # Posição inicial da comida
+    food_x = round(random.randrange(0, WIDTH - BLOCK_SIZE) / 20.0) * 20.0
+    food_y = round(random.randrange(0, HEIGHT - BLOCK_SIZE) / 20.0) * 20.0
+
+    while not game_over:
+
+        while game_close:
+            screen.fill(BLACK)
+            font_style = pygame.font.SysFont("bahnschrift", 35)
+            message = font_style.render("Você perdeu! Pressione C para jogar novamente ou Q para sair.", True, RED)
+            screen.blit(message, [WIDTH / 6, HEIGHT / 3])
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        game_loop()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT and x1_change == 0:
+                    x1_change = -BLOCK_SIZE
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT and x1_change == 0:
+                    x1_change = BLOCK_SIZE
+                    y1_change = 0
+                elif event.key == pygame.K_UP and y1_change == 0:
+                    x1_change = 0
+                    y1_change = -BLOCK_SIZE
+                elif event.key == pygame.K_DOWN and y1_change == 0:
+                    x1_change = 0
+                    y1_change = BLOCK_SIZE
+
+        # Verifica se a cobra colidiu com a borda
+        if x1 >= WIDTH or x1 < 0 or y1 >= HEIGHT or y1 < 0:
+            game_close = True
+
+        x1 += x1_change
+        y1 += y1_change
+        screen.fill(BLACK)
+
+        # Desenha a comida
+        pygame.draw.rect(screen, RED, [food_x, food_y, BLOCK_SIZE, BLOCK_SIZE])
+
+        # Atualiza a cobra
+        snake_head = []
+        snake_head.append(x1)
+        snake_head.append(y1)
+        snake_list.append(snake_head)
+        if len(snake_list) > length_of_snake:
+            del snake_list[0]
+
+        # Verifica se a cobra colidiu com ela mesma
+        for block in snake_list[:-1]:
+            if block == snake_head:
+                game_close = True
+
+        draw_snake(BLOCK_SIZE, snake_list)
+
+        pygame.display.update()
+
+        # Verifica se a cobra comeu a comida
+        if x1 == food_x and y1 == food_y:
+            food_x = round(random.randrange(0, WIDTH - BLOCK_SIZE) / 20.0) * 20.0
+            food_y = round(random.randrange(0, HEIGHT - BLOCK_SIZE) / 20.0) * 20.0
+            length_of_snake += 1
+
+        clock.tick(SNAKE_SPEED)
+
+    pygame.quit()
+    quit()
+
+# Executa o jogo
+game_loop()

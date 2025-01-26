@@ -24,7 +24,8 @@ def calculadora():
     while True:
         try:
             escolha = int(input("Digite sua escolha (1/2/3/4): "))
-            if escolha not in [1, 2, 3, 4]:
+
+            if escolha < 1 or escolha > 4:
                 print("Opção inválida. Tente novamente.")
                 continue
 
@@ -38,7 +39,8 @@ def calculadora():
             elif escolha == 3:
                 print(f"Resultado: {num1} * {num2} = {multiplicacao(num1, num2)}")
             elif escolha == 4:
-                print(f"Resultado: {num1} / {num2} = {divisao(num1, num2)}")
+                resultado = divisao(num1, num2)
+                print(f"Resultado: {num1} / {num2} = {resultado}")
 
             continuar = input("Deseja realizar outra operação? (s/n): ").lower()
             if continuar != 's':
